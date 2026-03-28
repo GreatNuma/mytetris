@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>TAMAGREN Tetris Pro</title>
   <style>
     :root {
       --primary: #00ffcc;
       --bg-dark: #0a0a12;
       --panel: rgba(20, 20, 35, 0.9);
+      --btn-size: 60px;
     }
+
+    * { box-sizing: border-box; touch-action: manipulation; }
 
     body {
       background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a12 100%);
       font-family: 'Segoe UI', Roboto, sans-serif;
       color: #fff;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
@@ -26,21 +29,29 @@
 
     .game-wrapper {
       display: flex;
-      gap: 30px;
+      gap: 15px;
       align-items: flex-start;
-      padding: 20px;
+      max-width: 100%;
+      padding: 10px;
     }
 
-    .game-container {
-      position: relative;
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .game-wrapper { flex-direction: column; align-items: center; gap: 5px; }
+      .side-panel { flex-direction: row !important; width: 100% !important; justify-content: center; }
+      .panel-box { padding: 8px !important; }
+      h1 { font-size: 1.2rem !important; margin-bottom: 5px !important; }
+      #leaderboard { display: none; } /* Hide leaderboard on small mobile to save space */
     }
+
+    .game-container { position: relative; }
 
     h1 {
       margin: 0 0 10px 0;
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: var(--primary);
       text-align: center;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }
 
@@ -49,145 +60,122 @@
       border: 3px solid #1f1f3a;
       border-radius: 8px;
       display: block;
+      height: 70vh; /* Scalable height */
+      width: auto;
     }
 
-    /* Panels */
     .side-panel {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      width: 180px;
+      gap: 10px;
+      width: 140px;
     }
 
     .panel-box {
       background: var(--panel);
-      padding: 15px;
+      padding: 12px;
       border-radius: 12px;
       border: 1px solid rgba(0, 255, 204, 0.15);
     }
 
-    .stat-label {
-      color: var(--primary);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-      opacity: 0.8;
-    }
+    .stat-label { color: var(--primary); font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; }
+    .stat-value { font-size: 1.2rem; font-weight: bold; font-family: monospace; }
 
-    .stat-value {
-      font-size: 1.4rem;
-      font-weight: bold;
-      font-family: monospace;
-    }
-
-    /* Next Piece Canvas */
-    #nextCanvas {
-      background: rgba(0, 0, 0, 0.3);
-      margin-top: 10px;
-      border-radius: 4px;
-    }
+    #nextCanvas { background: rgba(0, 0, 0, 0.3); border-radius: 4px; width: 60px; height: 60px; }
 
     /* Overlay Styles */
     .overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(10, 10, 18, 0.96);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      border-radius: 8px;
-      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 100; border-radius: 8px; text-align: center;
     }
 
     button {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 10px;
-      transition: 0.2s;
+      background: transparent; color: var(--primary);
+      border: 2px solid var(--primary); border-radius: 8px;
+      padding: 10px; font-weight: bold; cursor: pointer;
+      transition: 0.2s; margin: 5px 0;
     }
 
-    button:hover {
-      background: var(--primary);
-      color: #000;
-      box-shadow: 0 0 10px var(--primary);
+    button:hover { background: var(--primary); color: #000; }
+
+    /* Mobile Controls */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, var(--btn-size));
+      grid-template-rows: repeat(2, var(--btn-size));
+      gap: 10px;
+      margin-top: 15px;
     }
 
-    input {
-      background: #1a1a2e;
+    .ctrl-btn {
+      width: var(--btn-size);
+      height: var(--btn-size);
+      background: rgba(255, 255, 255, 0.1);
       border: 1px solid var(--primary);
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 5px;
       color: white;
-      margin: 10px 0;
-      text-align: center;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      user-select: none;
     }
 
-    .score-entry {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin: 5px 0;
-      font-family: monospace;
-    }
+    .ctrl-btn:active { background: var(--primary); color: black; }
+
+    .score-entry { display: flex; justify-content: space-between; font-size: 0.75rem; font-family: monospace; margin: 3px 0; }
   </style>
 </head>
-
 <body>
 
   <div class="game-wrapper">
     <div class="side-panel">
       <div class="panel-box">
-        <div class="stat-label">Next Piece</div>
+        <div class="stat-label">Next</div>
         <canvas id="nextCanvas" width="80" height="80"></canvas>
       </div>
       <div class="panel-box">
         <div class="stat-label">Score</div>
         <div id="score" class="stat-value">0</div>
-        <div class="stat-label" style="margin-top:10px">Level</div>
-        <div id="diff-display" class="stat-value">-</div>
+        <button id="pauseBtn" onclick="togglePause()" style="margin-top:10px; width:100%; padding:5px;">PAUSE</button>
       </div>
     </div>
 
     <div class="game-container">
       <h1>TAMAGREN</h1>
-
       <div id="welcome-screen" class="overlay">
-        <h2 style="color: var(--primary)">CHOOSE MODE</h2>
+        <h2 style="color: var(--primary)">TAMAGREN PRO</h2>
         <div style="width: 80%">
-          <button onclick="startGame(1000, 'Easy')">Easy</button>
-          <button onclick="startGame(500, 'Medium')">Medium</button>
-          <button onclick="startGame(150, 'Hard')">Hard</button>
+          <button style="width:100%" onclick="startGame(1000, 'Easy')">Easy</button>
+          <button style="width:100%" onclick="startGame(500, 'Medium')">Medium</button>
+          <button style="width:100%" onclick="startGame(150, 'Hard')">Hard</button>
         </div>
       </div>
 
       <div id="game-over-screen" class="overlay" style="display: none;">
         <h2 style="color: #ff4d4d">GAME OVER</h2>
-        <input type="text" id="playerName" maxlength="10" placeholder="Your Name">
+        <input type="text" id="playerName" maxlength="10" placeholder="Your Name" style="padding:8px; border-radius:5px; margin-bottom:10px;">
         <button onclick="saveScore()">Submit Score</button>
       </div>
 
       <canvas id="tetris" width="240" height="400"></canvas>
     </div>
 
-    <div class="side-panel">
-      <div class="panel-box" id="leaderboard">
-        <div class="stat-label" style="border-bottom: 1px solid #333; padding-bottom: 5px;">🏆 Top 5</div>
+    <div class="side-panel" id="leaderboard">
+      <div class="panel-box">
+        <div class="stat-label">🏆 Top 5</div>
         <div id="score-list" style="margin-top: 10px;"></div>
       </div>
     </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-btn" style="grid-column: 2" onpointerdown="playerRotate()">↻</div>
+    <div class="ctrl-btn" style="grid-column: 1; grid-row: 2" onpointerdown="playerMove(-1)">←</div>
+    <div class="ctrl-btn" style="grid-column: 2; grid-row: 2" onpointerdown="playerDrop()">↓</div>
+    <div class="ctrl-btn" style="grid-column: 3; grid-row: 2" onpointerdown="playerMove(1)">→</div>
   </div>
 
   <script>
@@ -201,7 +189,6 @@
 
     const colors = [null, '#00f0f0', '#0077ff', '#ffaa00', '#ffee00', '#00ff66', '#aa00ff', '#ff3355'];
 
-    // --- GAME LOGIC ---
     function createPiece(type) {
       if (type === 'I') return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
       if (type === 'L') return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
@@ -232,7 +219,6 @@
       drawMatrix(arena, { x: 0, y: 0 }, context);
       drawMatrix(player.matrix, player.pos, context);
 
-      // Draw Next Piece Preview
       nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
       drawMatrix(nextPiece, { x: 1, y: 1 }, nextContext);
     }
@@ -269,20 +255,15 @@
 
     function playerReset() {
       const pieces = 'ILJOTSZ';
-      if (nextPiece === null) {
-        player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
-      } else {
-        player.matrix = nextPiece;
-      }
+      player.matrix = nextPiece || createPiece(pieces[pieces.length * Math.random() | 0]);
       nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
-
       player.pos.y = 0;
       player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-
       if (collide(arena, player)) gameOver();
     }
 
     function playerDrop() {
+      if (gamePaused) return;
       player.pos.y++;
       if (collide(arena, player)) {
         player.pos.y--;
@@ -299,11 +280,13 @@
     }
 
     function playerMove(dir) {
+      if (gamePaused) return;
       player.pos.x += dir;
       if (collide(arena, player)) player.pos.x -= dir;
     }
 
     function playerRotate() {
+      if (gamePaused) return;
       const pos = player.pos.x;
       let offset = 1;
       rotate(player.matrix, 1);
@@ -318,7 +301,14 @@
       }
     }
 
-    // --- STATE ---
+    function togglePause() {
+        if(document.getElementById('welcome-screen').style.display === 'none' && 
+           document.getElementById('game-over-screen').style.display === 'none') {
+            gamePaused = !gamePaused;
+            document.getElementById('pauseBtn').innerText = gamePaused ? "RESUME" : "PAUSE";
+        }
+    }
+
     const arena = Array.from({ length: 20 }, () => new Array(12).fill(0));
     const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0 };
     let nextPiece = null;
@@ -327,12 +317,14 @@
 
     function startGame(speed, label) {
       dropInterval = speed;
-      document.getElementById('diff-display').innerText = label;
       document.getElementById('welcome-screen').style.display = 'none';
+      document.getElementById('game-over-screen').style.display = 'none';
       arena.forEach(row => row.fill(0));
       player.score = 0;
+      document.getElementById('score').innerText = "0";
       nextPiece = null;
       gamePaused = false;
+      document.getElementById('pauseBtn').innerText = "PAUSE";
       playerReset();
     }
 
@@ -365,11 +357,14 @@
         dropCounter += deltaTime;
         if (dropCounter > dropInterval) playerDrop();
         draw();
+      } else {
+        lastTime = time; // Keep timer sync'd during pause
       }
       requestAnimationFrame(update);
     }
 
     document.addEventListener('keydown', e => {
+      if (e.key === 'p' || e.key === 'P') togglePause();
       if (gamePaused) return;
       if (e.key === 'ArrowLeft') playerMove(-1);
       if (e.key === 'ArrowRight') playerMove(1);
@@ -381,5 +376,4 @@
     update();
   </script>
 </body>
-
 </html>

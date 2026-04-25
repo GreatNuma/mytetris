@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>The NUMA Family Tree</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e4d3c;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            flex: 1;
+            /* Pushes footer to bottom */
+            width: 100%;
+        }
+
+        .section {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .section h2 {
+            color: #2e4d3c;
+            margin-top: 0;
+        }
+
+        .input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            /* Ensures padding doesn't break grid */
+            font-family: inherit;
+        }
+
+        select.input {
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            align-items: start;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        button {
+            background: #2e4d3c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #3f6b54;
+        }
+
+        .remove-btn {
+            background: #a33b3b;
+            padding: 5px 10px;
+            font-size: 12px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            margin-top: 0;
+        }
+
+        .remove-btn:hover {
+            background: #c24b4b;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: #2e4d3c;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: auto;
+        }
+
+        footer a {
+            color: #a8d5ba;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌳 The NUMA Family Tree</h1>
+
+    <div class="container">
+
+        <div class="section" id="parent1">
+            <h2>Father / Parent 1</h2>
+            <div class="grid">
+                <input placeholder="Full Name" class="input" data-key="name">
+                <input placeholder="Age" class="input" data-key="age">
+                <input placeholder="Place of Birth" class="input" data-key="pob">
+                <input placeholder="Date of Birth" class="input" data-key="dob">
+                <input placeholder="Living or Deceased" class="input" data-key="status">
+            </div>
+        </div>
+
+        <div class="section" id="parent2">
+            <h2>Mother / Parent 2</h2>
+            <div class="grid">
+                <input placeholder="Full Name" class="input" data-key="name">
+                <input placeholder="Age" class="input" data-key="age">
+                <input placeholder="Place of Birth" class="input" data-key="pob">
+                <input placeholder="Date of Birth" class="input" data-key="dob">
+                <input placeholder="Living or Deceased" class="input" data-key="status">
+            </div>
+        </div>
+
+        <div class="section" id="you">
+            <h2>You</h2>
+            <div class="grid">
+                <input placeholder="Full Name" class="input" data-key="name">
+                <input placeholder="Age" class="input" data-key="age">
+                <input placeholder="Place of Birth" class="input" data-key="pob">
+                <input placeholder="Date of Birth" class="input" data-key="dob">
+
+                <select class="input" data-key="marital" onchange="toggleSpouse(this)">
+                    <option value="" disabled selected>Marital Status...</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                </select>
+                <input placeholder="Name of Spouse" class="input" data-key="spouse" style="display:none;">
+
+                <select class="input" data-key="kidsStatus" onchange="toggleKids(this)">
+                    <option value="" disabled selected>Children...</option>
+                    <option value="None">No Kids</option>
+                    <option value="Yes">Have Kids</option>
+                </select>
+                <input placeholder="Number of Kids" type="number" min="1" class="input" data-key="kidsCount"
+                    style="display:none;">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Siblings</h2>
+            <div id="siblings"></div>
+            <button onclick="addSibling()">+ Add Sibling</button>
+        </div>
+
+        <div class="actions">
+            <button onclick="saveData()">💾 Save Progress</button>
+            <button onclick="downloadFile()">📥 Download to Device</button>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Need help or have questions? Contact NUMA Support on WhatsApp:</p>
+        <p>📱 <a href="https://wa.me/1234567890" target="_blank">+1 (234) 567-890</a></p>
+    </footer>
+
+    <script>
+        // --- UI Logic (Show/Hide Fields) ---
+
+        function toggleSpouse(selectElem) {
+            const spouseInput = selectElem.nextElementSibling;
+            if (selectElem.value === 'Married') {
+                spouseInput.style.display = 'block';
+            } else {
+                spouseInput.style.display = 'none';
+                spouseInput.value = ''; // Clear value if hidden
+            }
+        }
+
+        function toggleKids(selectElem) {
+            const kidsInput = selectElem.nextElementSibling;
+            if (selectElem.value === 'Yes') {
+                kidsInput.style.display = 'block';
+            } else {
+                kidsInput.style.display = 'none';
+                kidsInput.value = ''; // Clear value if hidden
+            }
+        }
+
+        function removeSibling(btn) {
+            btn.parentElement.remove();
+        }
+
+        function addSibling(data = {}) {
+            const container = document.getElementById("siblings");
+            const div = document.createElement("div");
+            div.className = "section sibling-item";
+
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeSibling(this)">X Remove</button>
+                <div class="grid">
+                    <input placeholder="Full Name" class="input" data-key="name" value="${data.name || ''}">
+                    <input placeholder="Age" class="input" data-key="age" value="${data.age || ''}">
+                    <input placeholder="Place of Birth" class="input" data-key="pob" value="${data.pob || ''}">
+                    <input placeholder="Date of Birth" class="input" data-key="dob" value="${data.dob || ''}">
+                    
+                    <select class="input" data-key="marital" onchange="toggleSpouse(this)">
+                        <option value="" disabled ${!data.marital ? 'selected' : ''}>Marital Status...</option>
+                        <option value="Single" ${data.marital === 'Single' ? 'selected' : ''}>Single</option>
+                        <option value="Married" ${data.marital === 'Married' ? 'selected' : ''}>Married</option>
+                    </select>
+                    <input placeholder="Name of Spouse" class="input" data-key="spouse" value="${data.spouse || ''}" style="display: ${data.marital === 'Married' ? 'block' : 'none'};">
+
+                    <select class="input" data-key="kidsStatus" onchange="toggleKids(this)">
+                        <option value="" disabled ${!data.kidsStatus ? 'selected' : ''}>Children...</option>
+                        <option value="None" ${data.kidsStatus === 'None' ? 'selected' : ''}>No Kids</option>
+                        <option value="Yes" ${data.kidsStatus === 'Yes' ? 'selected' : ''}>Have Kids</option>
+                    </select>
+                    <input placeholder="Number of Kids" type="number" min="1" class="input" data-key="kidsCount" value="${data.kidsCount || ''}" style="display: ${data.kidsStatus === 'Yes' ? 'block' : 'none'};">
+                </div>
+            `;
+
+            container.appendChild(div);
+        }
+
+        // --- Data Management (Save/Load/Download) ---
+
+        // Helper function to extract data from a specific section
+        function getSectionData(sectionElement) {
+            const data = {};
+            sectionElement.querySelectorAll('.input').forEach(input => {
+                data[input.dataset.key] = input.value;
+            });
+            return data;
+        }
+
+        // Helper function to populate data into a specific section
+        function setSectionData(sectionElement, data) {
+            if (!data) return;
+            sectionElement.querySelectorAll('.input').forEach(input => {
+                if (data[input.dataset.key] !== undefined) {
+                    input.value = data[input.dataset.key];
+                    // Trigger onchange for selects so the spouse/kids inputs show/hide correctly on load
+                    if (input.tagName === 'SELECT') {
+                        input.dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+        }
+
+        function getFullTreeData() {
+            const treeData = {
+                parent1: getSectionData(document.getElementById("parent1")),
+                parent2: getSectionData(document.getElementById("parent2")),
+                you: getSectionData(document.getElementById("you")),
+                siblings: []
+            };
+
+            document.querySelectorAll(".sibling-item").forEach(sibling => {
+                treeData.siblings.push(getSectionData(sibling));
+            });
+
+            return treeData;
+        }
+
+        function saveData() {
+            const data = getFullTreeData();
+            localStorage.setItem("familyTree", JSON.stringify(data));
+            alert("Progress saved locally!");
+        }
+
+        function loadData() {
+            const savedStr = localStorage.getItem("familyTree");
+            if (!savedStr) return;
+
+            const saved = JSON.parse(savedStr);
+
+            setSectionData(document.getElementById("parent1"), saved.parent1);
+            setSectionData(document.getElementById("parent2"), saved.parent2);
+            setSectionData(document.getElementById("you"), saved.you);
+
+            // Clear and reload siblings to prevent duplicates on refresh
+            document.getElementById("siblings").innerHTML = "";
+            if (saved.siblings) {
+                saved.siblings.forEach(sibData => addSibling(sibData));
+            }
+        }
+
+        function downloadFile() {
+            // 1. Gather all current data
+            const data = getFullTreeData();
+            const dataString = JSON.stringify(data, null, 4); // Format nicely
+
+            // 2. Create a "Blob" (a file-like object)
+            const blob = new Blob([dataString], { type: "application/json" });
+
+            // 3. Create a temporary download link and click it
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "NUMA_Family_Tree.json";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href); // Clean up memory
+        }
+
+        // Load data on start
+        window.onload = loadData;
+    </script>
+
+</body>
+
+</html>

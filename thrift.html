@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airsay Thrift | Fresh Fits</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-color: #e0e7e3;
+            --primary-navy: #00302b;
+            --card-bg: #2d3e3a;
+            --accent-catchy: #ffbf00;
+            --text-light: #f4f7f4;
+            --footer-bg: #1a2623;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-navy);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: var(--primary-navy);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-placeholder {
+            width: 110px;
+            height: 110px;
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 0 5px rgba(255, 191, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 4.5rem;
+            margin: 0;
+            color: var(--accent-catchy);
+            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            margin-top: 0.5rem;
+            font-weight: 300;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            color: var(--bg-color);
+        }
+
+        /* --- PRODUCT GRID --- */
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+            justify-items: center;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            display: block;
+            opacity: 0.95;
+            transition: opacity 0.3s;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .price-tag {
+            display: inline-block;
+            background-color: var(--accent-catchy);
+            color: var(--primary-navy);
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 0.7rem 2rem;
+            border-radius: 6px;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+            transition: 0.2s ease;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+
+        .price-tag:hover {
+            transform: scale(1.05);
+            background-color: #ffcc33;
+        }
+
+        /* --- CHECKOUT MODAL SECTION --- */
+        #checkout-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 48, 43, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+
+        .checkout-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .payment-card {
+            background: var(--card-bg);
+            color: var(--text-light);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .payment-card h2 {
+            border-bottom: 2px solid var(--accent-catchy);
+            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-summary {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .payment-option {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .option-title {
+            color: var(--accent-catchy);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .bank-details span {
+            display: block;
+            color: var(--accent-catchy);
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        .card-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pay-btn {
+            width: 100%;
+            background-color: var(--accent-catchy);
+            color: var(--primary-navy);
+            border: none;
+            padding: 15px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .close-btn {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--text-light);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: block;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--bg-color);
+            padding: 4rem 1rem 2rem;
+            text-align: center;
+            margin-top: 5rem;
+            border-top: 5px solid var(--accent-catchy);
+        }
+
+        .footer-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .social-handles a {
+            color: var(--bg-color);
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3.2rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <img src="images/logo.png" alt="Airsay Thrift Logo">
+        </div>
+        <h1>AIRSAY THRIFT</h1>
+        <p class="subtitle">PREMIUM THRIFT • TIMELESS STYLE</p>
+    </header>
+
+    <div class="container">
+        <div class="product-grid">
+
+            <!-- Item 1 -->
+            <div class="product-card">
+                <img src="images/tshirt.JPG" alt="Vintage T-Shirts" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">Vintage T-Shirts</div>
+                    <button class="price-tag" onclick="openCheckout('Vintage T-Shirts', '₦6,500')">₦6,500</button>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="product-card">
+                <img src="images/handless.JPG" alt="Sleeveless" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">Sleeveless Tops</div>
+                    <button class="price-tag" onclick="openCheckout('Sleeveless Tops', '₦5,000')">₦5,000</button>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="product-card">
+                <img src="images/joggers.JPG" alt="Joggers" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">Retro Track Joggers</div>
+                    <button class="price-tag" onclick="openCheckout('Retro Track Joggers', '₦7,500')">₦7,500</button>
+                </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="product-card">
+                <img src="images/jeans.JPG" alt="Jeans" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">Classic Jeans</div>
+                    <button class="price-tag" onclick="openCheckout('Classic Jeans', '₦6,000')">₦6,000</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- --- HIDDEN CHECKOUT SECTION --- -->
+    <div id="checkout-overlay">
+        <div class="checkout-container">
+            <div class="payment-card">
+                <h2>Complete Your Order</h2>
+
+                <div class="order-summary">
+                    <p>Selected Item: <strong id="summary-item-name">Fresh Fit</strong></p>
+                    <p>Total Amount: <strong id="summary-item-price" style="color: var(--accent-catchy);">₦XXXX</strong>
+                    </p>
+                </div>
+
+                <!-- Option 1: Bank Transfer -->
+                <div class="payment-option">
+                    <div class="option-title">🏦 Bank Transfer</div>
+                    <div class="bank-details">
+                        <p>Transfer the total amount to the account below and send proof of payment to our WhatsApp.</p>
+                        <span>Bank: Zenith Bank</span>
+                        <span>Account Number: 1234567890</span>
+                        <span>Account Name: Airsay Thrift Store</span>
+                    </div>
+                    <button class="pay-btn" onclick="window.location.href='https://wa.me/2348001234567'">Send Receipt to
+                        WhatsApp</button>
+                </div>
+
+                <div style="text-align: center; margin: 1rem 0; opacity: 0.5;">— OR —</div>
+
+                <!-- Option 2: Card Payment -->
+                <div class="payment-option">
+                    <div class="option-title">💳 Card Payment</div>
+                    <form onsubmit="alert('Payment processing simulated!'); return false;">
+                        <input type="text" placeholder="Cardholder Name" required>
+                        <input type="text" placeholder="Card Number" required>
+                        <div class="card-row">
+                            <input type="text" placeholder="MM/YY" required>
+                            <input type="text" placeholder="CVV" required>
+                        </div>
+                        <button type="submit" class="pay-btn">Securely Pay Now</button>
+                    </form>
+                </div>
+
+                <button class="close-btn" onclick="closeCheckout()">← Back to Shop</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>📍 Warri, Delta, Nigeria</p>
+                <p>📞 +234 800 123 4567</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Follow the Drip</h3>
+                <div class="social-handles">
+                    <a href="#">Instagram</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <p style="margin-top: 3rem; font-size: 0.8rem; opacity: 0.6;">&copy; 2026 Airsay Thrift. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+        function openCheckout(name, price) {
+            document.getElementById('summary-item-name').innerText = name;
+            document.getElementById('summary-item-price').innerText = price;
+            document.getElementById('checkout-overlay').style.display = 'block';
+            window.scrollTo(0, 0); // Scroll to top to see checkout
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-overlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
